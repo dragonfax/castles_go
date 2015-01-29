@@ -22,12 +22,13 @@ const (
 	Down
 )
 
+const CELL_SIZE = 20 // pixels across a square Cell
 const BOARD_WIDTH_CELLS = 100
 const BOARD_HEIGHT_CELLS = 80
 const BOARD_NUM_CELLS = BOARD_WIDTH_CELLS * BOARD_HEIGHT_CELLS
 
 type Board struct {
-	wallCells [BOARD_NUM_CELLS]int
+	wallCells [BOARD_NUM_CELLS]int // [x*y] = health of cell
 }
 
 func NewBoard() *Board {
@@ -51,18 +52,26 @@ type Wall struct {
 	health      int
 }
 
-var enemyList = make(map[*Enemy]bool)
+type EnemySet map[*Enemy]bool
 
 type Enemy struct {
 	position  Vector
 	direction float32
+	enemySet EnemySet
 }
 
-func NewEnemy() *Enemy {
+
+func NewEnemy(enemySet EnemySet) *Enemy {
 	this := new(Enemy)
 	choose a location along map edge
 	go this.moveLoop()
+	this.enemySet = enemySet
+	this.enemySet[this] = true
 	return this
+}
+
+func (this *Enemy)) close() {
+	delete(this.enemySet, this)
 }
 
 func (this *Enemy) moveLoop() {
@@ -104,10 +113,12 @@ func mainThreadLoop() {
 type Game struct {
 	currentWall Wall
 	board Board
+	enemySet EnemySet
 }
 
 func NewGame() *Game {
 	this = new(Game)
+	this.enemySet = make(EnemySet)
 	return this
 }
 
@@ -138,12 +149,12 @@ func (this *Game) drawLoop() {
 }
 
 func (this *Game) generateEnemy() {
-	NewEnemy()
+	e := NewEnemy(this.enemySet)
 }
 
 func (this *Game) generateEnemyLoop() {
 	for {
-		this.generateEnemy
+		this.generateEnemy()
 		wait on enemy generation ticker
 	}
 }
