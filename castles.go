@@ -34,6 +34,16 @@ func NewBoard() *Board {
 	this := new(Board)
 }
 
+func (this *Board) dropWallAt(x, y float32, wall Wall) {
+	is the space clear of walls
+		then drop it
+		does it collide with any enemies
+			then wall kill them.
+		clear out the currentWall
+		pick a new random wall
+}
+
+
 type Wall struct {
 	position    Vector
 	orientation Direction
@@ -82,68 +92,7 @@ func (this *Enemy) wallkill() {
 	destroy this enemy
 }
 
-var currentWall Wall
 
-func pickRandomWall() {
-	wtype := WallType(rand.Int() % NUM_WALLTYPES)
-	currentWall = NewWall(wtype)
-}
-
-func dropWallAt(x, y float32, wall Wall) {
-	is the space clear of walls
-		then drop it
-		does it collide with any enemies
-			then wall kill them.
-		clear out the currentWall
-		pick a new random wall
-}
-
-func handleEvents() {
-	read events
-	track mouse
-	draw current wall at normalized mouse position
-	if mouse cliekd
-		drawWallAt(mouse location)
-}
-
-func handleEventsLoop() {
-	for {
-		handleEvents()
-		wait for input ticker
-	}
-}
-
-
-/* enemy generator
- * how often to generate new enemies
- *
- * at a steady rate so that you have to kill them.
- */
-
-func generateEnemy() {
-	NewEnemy()
-}
-
-func generateEnemyLoop() {
-	for {
-		generateEnemy
-		wait on enemy generation ticker
-	}
-}
-
-
-func drawGame() {
-	draw board
-	draw all emenites
-	draw currentWall
-}
-
-func drawGameLoop() {
-	for {
-		drawGame()
-		wait on render fps limiter
-	}
-}
 
 func mainThreadLoop() {
 	for {
@@ -152,12 +101,75 @@ func mainThreadLoop() {
 	}
 }
 
-func main() {
+type Game struct {
+	currentWall Wall
+	board Board
+}
 
+func NewGame() *Game {
+	this = new(Game)
+	return this
+}
+
+func (this *Game) setup() {
 	init screen and devices
+	this.board = NewBoard()
+	this.currentWall = this.pickRandomWall()
+}
 
+func (this *Game) run() {
+	this.setup()
 	go handleEventsLoop()
-	go generateEnemyLoop()
-	go drawGameLoop()
+	go this.generateEnemyLoop()
+	go this.drawLoop()
+}
+
+func (this *Game) draw() {
+	draw board
+	draw all emenites
+	draw currentWall
+}
+
+func (this *Game) drawLoop() {
+	for {
+		this.draw()
+		wait on render fps limiter
+	}
+}
+
+func (this *Game) generateEnemy() {
+	NewEnemy()
+}
+
+func (this *Game) generateEnemyLoop() {
+	for {
+		this.generateEnemy
+		wait on enemy generation ticker
+	}
+}
+
+func (this *Game) handleEvents() {
+	read events
+	track mouse
+	draw current wall at normalized mouse position
+	if mouse cliekd
+		this.board.drawWallAt(mouse location)
+}
+
+func (this *Game) handleEventsLoop() {
+	for {
+		this.handleEvents()
+		wait for input ticker
+	}
+}
+
+func (this *Game) pickRandomWall() {
+	wtype := WallType(rand.Int() % NUM_WALLTYPES)
+	this.currentWall = NewWall(wtype)
+}
+
+
+func main() {
+	go NewGame().run()
 	mainThreadLoop()
 }
