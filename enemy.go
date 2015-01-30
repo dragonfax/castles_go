@@ -2,6 +2,8 @@ package main
 
 import "time"
 
+const ENEMY_SIZE = CELL_SIZE / 5
+
 type EnemySet map[*Enemy]bool
 
 func (this EnemySet) wallKills(wall Wall) {
@@ -28,7 +30,7 @@ type Enemy struct {
 	board      *Board
 }
 
-func NewEnemy(enemySet EnemySet) *Enemy {
+func NewEnemy(enemySet EnemySet, board *Board) *Enemy {
 	this := new(Enemy)
 
 	this.moveToEdgeOfMap()
@@ -36,6 +38,7 @@ func NewEnemy(enemySet EnemySet) *Enemy {
 	go this.moveLoop()
 	this.enemySet = enemySet
 	this.enemySet[this] = true
+	this.board = board
 	return this
 }
 
@@ -57,20 +60,40 @@ func (this *Enemy) moveLoop() {
 }
 
 func (this *Enemy) draw() {
+	drawFilledRectangle(this.position, ENEMY_SIZE, ENEMY_SIZE, red())
 }
 
 func (this *Enemy) move() {
-	/*
-		verify there is a wall in direction
-		if so
-			move towards wall
-		if not
-			find a new random direction towards a wall.
-		if next to wall
-			eat wall
-		if not moving and not eating a wall and not next to a wall
-			choose a new diretion towards a wall.
-	*/
+
+	if this.board.get(this.target) == 0 {
+		// choose a new target
+		this.target = this.board.getRandomWallPosition()
+	}
+
+	nextStep := WindowPos{}
+
+	if this.target.x > this.position.x {
+		nextStep.x = this.target.x + ENEMY_SIZE
+	} else {
+		nextStep.x = this.target.x - ENEMY_SIZE
+	}
+
+	if this.target.y > this.position.y {
+		nextStep.y = this.target.y + ENEMY_SIZE
+	} else {
+		nextStep.y = this.target.y - ENEMY_SIZE
+	}
+
+	bp := windowToBoardPos(nextStep)
+
+	if this.board.get(bp) != 0 {
+		// wall in the way, eat it.
+		this.board.eat(bp)
+	} else {
+		// empty space, move there
+		this.position = nextStep
+	}
+
 }
 
 func (this *Enemy) wallkill() {

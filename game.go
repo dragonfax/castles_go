@@ -49,7 +49,7 @@ func (this *Game) drawLoop() {
 }
 
 func (this *Game) generateEnemy() {
-	NewEnemy(this.enemySet)
+	NewEnemy(this.enemySet, this.board)
 }
 
 func (this *Game) generateEnemyLoop() {

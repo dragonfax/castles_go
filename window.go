@@ -84,9 +84,13 @@ func drawRectangle(v WindowPos, width, height int, color [4]uint8) {
 }
 
 func blue(r uint8) [4]uint8 {
-	return [4]uint8{0, 0, r + 100, 255}
+	return [4]uint8{0, 0, r, 255}
 }
 
 func black() [4]uint8 {
 	return [4]uint8{0, 0, 0, 255}
+}
+
+func red() [4]uint8 {
+	return [4]uint8{255, 0, 0, 255}
 }
