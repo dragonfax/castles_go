@@ -11,12 +11,12 @@ const CELL_SIZE = 20 // pixels across a square Cell
 var renderer *sdl.Renderer
 var window *sdl.Window
 
-func screenToBoardPos(v Vector) Vector {
-	return Vector{v.x / CELL_SIZE, v.y / CELL_SIZE}
+func windowToBoardPos(v WindowPos) BoardPos {
+	return BoardPos{v.x / CELL_SIZE, v.y / CELL_SIZE}
 }
 
-func boardToScreenPos(sv Vector) Vector {
-	return Vector{sv.x * CELL_SIZE, sv.y * CELL_SIZE}
+func boardToWindowPos(sv BoardPos) WindowPos {
+	return WindowPos{sv.x * CELL_SIZE, sv.y * CELL_SIZE}
 }
 
 func initWindow() {
@@ -69,15 +69,15 @@ func windowEventsLoop() {
 	}
 }
 
-func drawFilledRectangle(x, y, width, height int, color [4]uint8) {
-	err := boxRGBA(renderer, x, y, x+width, y+height, color[0], color[1], color[2], color[3])
+func drawFilledRectangle(v WindowPos, width, height int, color [4]uint8) {
+	err := boxRGBA(renderer, v.x, v.y, v.x+width, v.y+height, color[0], color[1], color[2], color[3])
 	if err != nil {
 		panic(err)
 	}
 }
 
-func drawRectangle(x, y, width, height int, color [4]uint8) {
-	err := rectangleRGBA(renderer, x, y, x+width, y+height, color[0], color[1], color[2], color[3])
+func drawRectangle(v WindowPos, width, height int, color [4]uint8) {
+	err := rectangleRGBA(renderer, v.x, v.y, v.x+width, v.y+height, color[0], color[1], color[2], color[3])
 	if err != nil {
 		panic(err)
 	}

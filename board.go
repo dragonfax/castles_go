@@ -76,17 +76,17 @@ var wallShapes = [][][]int{
 }
 
 type Wall struct {
-	position Vector
+	position BoardPos
 	wType    WallType
 }
 
 func (this *Wall) draw() {
 	for _, p := range wallShapes[this.wType] {
-		wx := this.position.x + p[0]
-		wy := this.position.y + p[1]
-		bv := boardToScreenPos(Vector{wx, wy})
-		drawFilledRectangle(bv.x, bv.y, CELL_SIZE, CELL_SIZE, blue(100))
-		drawRectangle(bv.x, bv.y, CELL_SIZE, CELL_SIZE, black())
+		bx := this.position.x + p[0]
+		by := this.position.y + p[1]
+		wv := boardToWindowPos(BoardPos{bx, by})
+		drawFilledRectangle(wv, CELL_SIZE, CELL_SIZE, blue(255))
+		drawRectangle(wv, CELL_SIZE, CELL_SIZE, black())
 	}
 }
 
@@ -99,20 +99,53 @@ func NewBoard() *Board {
 	return this
 }
 
-func (this *Board) get(x, y int) uint8 {
-	return this.wallCells[x*BOARD_HEIGHT_CELLS+y]
+func (this *Board) get(p BoardPos) uint8 {
+	if p.x >= BOARD_WIDTH_CELLS {
+		panic("requested a coorinate too wide")
+	}
+	if p.y >= BOARD_HEIGHT_CELLS {
+		panic("requested a coorinate too high")
+	}
+	return this.wallCells[p.x*BOARD_HEIGHT_CELLS+p.y]
 }
 
-func (this *Board) set(x, y int, value uint8) {
-	this.wallCells[x*BOARD_HEIGHT_CELLS+y] = value
+func (this *Board) set(b BoardPos, value uint8) {
+	if b.x >= BOARD_WIDTH_CELLS {
+		panic("requested a coorinate too wide")
+	}
+	if b.y >= BOARD_HEIGHT_CELLS {
+		panic("requested a coorinate too high")
+	}
+	this.wallCells[b.x*BOARD_HEIGHT_CELLS+b.y] = value
+}
+
+func (this *Board) eat(p BoardPos) {
+	this.set(p, this.get(p)-5)
+}
+
+func (this *Board) getRandomWallPosition() BoardPos {
+	p := BoardPos{}
+	for x := 0; x < BOARD_WIDTH_CELLS; x++ {
+		for y := 0; y < BOARD_HEIGHT_CELLS; y++ {
+			p.x = x
+			p.y = y
+			if this.get(p) != 0 {
+				return p
+			}
+		}
+	}
+	return p
 }
 
 func (this *Board) draw() {
+	p := BoardPos{}
 	for x := 0; x < BOARD_WIDTH_CELLS; x++ {
 		for y := 0; y < BOARD_HEIGHT_CELLS; y++ {
-			color := this.get(x, y)
-			bv := boardToScreenPos(Vector{x, y})
-			drawFilledRectangle(bv.x, bv.y, CELL_SIZE, CELL_SIZE, blue(color))
+			p.x = x
+			p.y = y
+			health := this.get(p)
+			wv := boardToWindowPos(p)
+			drawFilledRectangle(wv, CELL_SIZE, CELL_SIZE, blue(uint8(float32(health)*(255/WALL_MAX_HEALTH))))
 		}
 	}
 }
@@ -122,7 +155,8 @@ func (this *Board) isWallClear(wall Wall) bool {
 	for _, p := range wallShapes[wall.wType] {
 		wx := wall.position.x + p[0]
 		wy := wall.position.y + p[1]
-		if this.get(wx, wy) != 0 {
+		w := BoardPos{wx, wy}
+		if this.get(w) != 0 {
 			return false
 		}
 	}
@@ -135,7 +169,8 @@ func (this *Board) dropWall(wall Wall) bool {
 		for _, p := range wallShapes[wall.wType] {
 			wx := wall.position.x + p[0]
 			wy := wall.position.y + p[1]
-			this.set(wx, wy, WALL_MAX_HEALTH)
+			w := BoardPos{wx, wy}
+			this.set(w, WALL_MAX_HEALTH)
 		}
 		return true
 	}

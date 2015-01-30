@@ -6,7 +6,7 @@ type EnemySet map[*Enemy]bool
 
 func (this EnemySet) wallKills(wall Wall) {
 	for e, _ := range this {
-		bpos := screenToBoardPos(e.position)
+		bpos := windowToBoardPos(e.position)
 		if bpos == wall.position {
 			e.wallkill()
 		}
@@ -20,10 +20,12 @@ func (this EnemySet) draw() {
 }
 
 type Enemy struct {
-	position   Vector
+	position   WindowPos
 	direction  float32
 	enemySet   EnemySet
 	stopMoving bool
+	target     BoardPos
+	board      *Board
 }
 
 func NewEnemy(enemySet EnemySet) *Enemy {
@@ -38,7 +40,7 @@ func NewEnemy(enemySet EnemySet) *Enemy {
 }
 
 func (this *Enemy) moveToEdgeOfMap() {
-	this.position = Vector{0, 0}
+	this.position = WindowPos{0, 0}
 }
 
 func (this *Enemy) close() {
