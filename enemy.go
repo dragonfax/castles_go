@@ -4,7 +4,7 @@ import "time"
 
 type EnemySet map[*Enemy]bool
 
-func (this *EnemySet) wallKills(wall Wall) {
+func (this EnemySet) wallKills(wall Wall) {
 	for e, _ := range this {
 		bpos := screenToBoardPos(e.position)
 		if bpos == wall.position {
@@ -13,7 +13,7 @@ func (this *EnemySet) wallKills(wall Wall) {
 	}
 }
 
-func (this *EnemySet) draw() {
+func (this EnemySet) draw() {
 	for e, _ := range this {
 		e.draw()
 	}
@@ -38,7 +38,7 @@ func NewEnemy(enemySet EnemySet) *Enemy {
 }
 
 func (this *Enemy) moveToEdgeOfMap() {
-	this.pos = Vector{0, 0}
+	this.position = Vector{0, 0}
 }
 
 func (this *Enemy) close() {
@@ -46,12 +46,15 @@ func (this *Enemy) close() {
 }
 
 func (this *Enemy) moveLoop() {
-	moveTicker == time.NewTicker(time.Second/5)
+	moveTicker := time.NewTicker(time.Second / 5)
 	for !this.stopMoving {
-		move()
+		this.move()
 		<-moveTicker.C
 	}
 	delete(this.enemySet, this)
+}
+
+func (this *Enemy) draw() {
 }
 
 func (this *Enemy) move() {

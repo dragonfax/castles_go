@@ -9,19 +9,19 @@ import (
 
 type Game struct {
 	currentWall Wall
-	board       Board
+	board       *Board
 	enemySet    EnemySet
 	drawTicker  *time.Ticker
 	enemyTicker *time.Ticker
 }
 
 func NewGame() *Game {
-	this = new(Game)
-	this.drawTicker = NewTicker()
-	this.enemyTicker = time.Ticker(time.Second)
+	this := new(Game)
+	this.drawTicker = time.NewTicker(time.Second / 60)
+	this.enemyTicker = time.NewTicker(time.Second)
 	this.enemySet = make(EnemySet)
 	this.board = NewBoard()
-	this.currentWall = this.pickRandomWall()
+	this.pickRandomWall()
 	return this
 }
 
@@ -32,11 +32,11 @@ func (this *Game) run() {
 }
 
 func (this *Game) draw() {
-	windowClear()
+	clearWindow()
 	this.board.draw()
 	this.enemySet.draw()
 	this.currentWall.draw()
-	windowFlip()
+	flipWindow()
 }
 
 func (this *Game) drawLoop() {
@@ -44,18 +44,18 @@ func (this *Game) drawLoop() {
 	for {
 		QueueMain(this.draw, waitC)
 		<-waitC
-		<-this.drawTicker
+		<-this.drawTicker.C
 	}
 }
 
 func (this *Game) generateEnemy() {
-	e := NewEnemy(this.enemySet)
+	NewEnemy(this.enemySet)
 }
 
 func (this *Game) generateEnemyLoop() {
 	for {
 		this.generateEnemy()
-		<-enemyTicker
+		<-this.enemyTicker.C
 	}
 }
 
@@ -76,7 +76,7 @@ func (this *Game) inputLoop() {
 
 func (this *Game) pickRandomWall() {
 	wtype := WallType(rand.Int() % NUM_WALLTYPES)
-	this.currentWall = NewWall(wtype, this.currentWall.position)
+	this.currentWall = Wall{this.currentWall.position, wtype}
 }
 
 func (this *Game) whenMouseMoves(event *sdl.MouseMotionEvent) {
@@ -88,6 +88,6 @@ func (this *Game) whenMouseMoves(event *sdl.MouseMotionEvent) {
 func (this *Game) whenMousePressed(event *sdl.MouseButtonEvent) {
 	if this.board.dropWall(this.currentWall) {
 		this.enemySet.wallKills(this.currentWall)
-		this.pickRandomWallt()
+		this.pickRandomWall()
 	}
 }

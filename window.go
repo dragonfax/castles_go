@@ -24,7 +24,7 @@ func initWindow() {
 		panic(fmt.Sprintf(" SDLInitFailedException( Unable to initialize SDL: %v", sdl.GetError()))
 	}
 
-	window, renderer, err := sdl.CreateWindowAndRenderer(640, 480, nil)
+	window, renderer, err := sdl.CreateWindowAndRenderer(640, 480, 0)
 	window.SetTitle("Castles")
 	if err != nil {
 		panic(fmt.Sprintf("SDLInitFailedException (Unable to create SDL screen: %v", sdl.GetError()))
@@ -48,9 +48,9 @@ func windowEventsLoop() {
 	for {
 		select {
 		case event := <-eventReceiver:
-			switch e := event.(type) {
+			switch event.(type) {
 			case *sdl.QuitEvent:
-				m.done = true
+				done = true
 				/*case *sdl.WindowEvent:
 				switch e.Event {
 				case sdl.WINDOWEVENT_RESIZED:
@@ -75,7 +75,7 @@ func drawRectangle(x, y, width, height int, color [4]uint8) {
 	rectangleRGBA(renderer, x, y, x+width, y+height, color[0], color[1], color[2], color[3])
 }
 
-func blue(r int) [4]uint8 {
+func blue(r uint8) [4]uint8 {
 	return [4]uint8{0, 0, r + 100, 255}
 }
 

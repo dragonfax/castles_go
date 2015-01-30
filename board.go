@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 const BOARD_WIDTH_CELLS = 100
 const BOARD_HEIGHT_CELLS = 80
 const BOARD_NUM_CELLS = BOARD_WIDTH_CELLS * BOARD_HEIGHT_CELLS
@@ -80,24 +82,18 @@ type Wall struct {
 	wType    WallType
 }
 
-func (this Wall) draw() {
-	screenPos := boardToScreenPos(this.position)
-	color := this.wallCells[wx*wy]
-	drawFilledRectangle(screenPos.x, screenPos.y, CELL_SIZE, CELL_SIZE, blue(100))
-	drawRectangle(screenPos.x, screenPos.y, CELL_SIZE, CELL_SIZE, black())
-}
-
 func (this *Wall) draw() {
 	for _, p := range wallShapes[this.wType] {
-		wx := this.x + p[0]
-		wy := this.y + p[1]
-		drawFilledRectangle(wx, wy, CELL_SIZE, CELL_SIZE, blue(100))
-		drawRectangle(wx, wy, CELL_SIZE, CELL_SIZE, black())
+		wx := this.position.x + p[0]
+		wy := this.position.y + p[1]
+		bv := boardToScreenPos(Vector{wx, wy})
+		drawFilledRectangle(bv.x, bv.y, CELL_SIZE, CELL_SIZE, blue(100))
+		drawRectangle(bv.x, bv.y, CELL_SIZE, CELL_SIZE, black())
 	}
 }
 
 type Board struct {
-	wallCells [BOARD_NUM_CELLS]int // [x*y] = health of cell
+	wallCells [BOARD_NUM_CELLS]uint8 // [x*y] = health of cell
 }
 
 func NewBoard() *Board {
@@ -106,20 +102,22 @@ func NewBoard() *Board {
 }
 
 func (this *Board) draw() {
-	for _, p := range wallShapes[wall.wType] {
-		wx := wall.x + p[0]
-		wy := wall.y + p[1]
-		color := this.wallCells[wx*wy]
-		drawFilledRectangle(wx, wy, CELL_SIZE, CELL_SIZE, blue(color))
+	for x := 0; x < BOARD_WIDTH_CELLS; x++ {
+		for y := 0; y < BOARD_HEIGHT_CELLS; y++ {
+			fmt.Printf("indexing %d,%d which is in cell %d and %d\n", x, y, x*BOARD_WIDTH_CELLS+y, BOARD_NUM_CELLS)
+			color := this.wallCells[x*BOARD_WIDTH_CELLS+y]
+			bv := boardToScreenPos(Vector{x, y})
+			drawFilledRectangle(bv.x, bv.y, CELL_SIZE, CELL_SIZE, blue(color))
+		}
 	}
 }
 
-func (this *Board) isWallClear(wall Wall) {
+func (this *Board) isWallClear(wall Wall) bool {
 
 	for _, p := range wallShapes[wall.wType] {
-		wx := wall.x + p[0]
-		wy := wall.y + p[1]
-		if this.wallCells[wx*wy] != 0 {
+		wx := wall.position.x + p[0]
+		wy := wall.position.y + p[1]
+		if this.wallCells[wx*BOARD_WIDTH_CELLS+wy] != 0 {
 			return false
 		}
 	}
@@ -130,9 +128,9 @@ func (this *Board) dropWall(wall Wall) bool {
 
 	if this.isWallClear(wall) {
 		for _, p := range wallShapes[wall.wType] {
-			wx := wall.x + p[0]
-			wy := wall.y + p[1]
-			this.wallCells[wx*wy] = WALL_MAX_HEALTH
+			wx := wall.position.x + p[0]
+			wy := wall.position.y + p[1]
+			this.wallCells[wx*BOARD_WIDTH_CELLS+wy] = WALL_MAX_HEALTH
 		}
 		return true
 	}

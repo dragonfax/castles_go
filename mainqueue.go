@@ -7,6 +7,8 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+var done bool
+
 type MainFunc func()
 
 var mainFuncC = make(chan MainFuncEvent)
@@ -26,7 +28,7 @@ func QueueMain(f MainFunc, w WaitChannel) {
 func MainQueueLoop() {
 	runtime.LockOSThread()
 
-	for !mainLoop.done {
+	for !done {
 		var didWork = false
 		select {
 		case receivedFuncEvent := <-mainFuncC:

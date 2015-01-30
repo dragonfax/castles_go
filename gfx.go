@@ -33,7 +33,7 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-func rectangleRGBA(renderer *sdl.Renderer, x1, y1, x2, y2 int, r, g, b, a uint8) bool {
+func rectangleRGBA(renderer *sdl.Renderer, x1, y1, x2, y2 int, r, g, b, a uint8) error {
 	var tmp int
 	var rect sdl.Rect
 
@@ -73,28 +73,31 @@ func rectangleRGBA(renderer *sdl.Renderer, x1, y1, x2, y2 int, r, g, b, a uint8)
 	/*
 	 * Create destination rect
 	 */
-	rect.x = x1
-	rect.y = y1
-	rect.w = x2 - x1
-	rect.h = y2 - y1
+	rect.X = int32(x1)
+	rect.Y = int32(y1)
+	rect.W = int32(x2 - x1)
+	rect.H = int32(y2 - y1)
 
 	/*
 	 * Draw
 	 */
-	var bm BlendMode
+	var bm sdl.BlendMode
 	if a == 255 {
 		bm = sdl.BLENDMODE_NONE
 	} else {
 		bm = sdl.BLENDMODE_BLEND
 	}
-	result := renderer.SetDrawBlendMode(renderer, bm)
-	result |= renderer.SetDrawColor(renderer, r, g, b, a)
-	result |= renderer.DrawRect(renderer, &rect)
-	return result
+	err := renderer.SetDrawBlendMode(bm)
+	if err == nil {
+		err = renderer.SetDrawColor(r, g, b, a)
+	}
+	if err == nil {
+		err = renderer.DrawRect(&rect)
+	}
+	return err
 }
 
-func boxRGBA(renderer *sdl.Renderer, x1, y1, x2, y2 int, r, g, b, a uint8) bool {
-	var tmp gl.int
+func boxRGBA(renderer *sdl.Renderer, x1, y1, x2, y2 int, r, g, b, a uint8) error {
 	var rect sdl.Rect
 
 	/*
@@ -115,6 +118,7 @@ func boxRGBA(renderer *sdl.Renderer, x1, y1, x2, y2 int, r, g, b, a uint8) bool 
 	/*
 	 * Swap x1, x2 if required
 	 */
+	var tmp int
 	if x1 > x2 {
 		tmp = x1
 		x1 = x2
@@ -133,10 +137,10 @@ func boxRGBA(renderer *sdl.Renderer, x1, y1, x2, y2 int, r, g, b, a uint8) bool 
 	/*
 	 * Create destination rect
 	 */
-	rect.x = x1
-	rect.y = y1
-	rect.w = x2 - x1 + 1
-	rect.h = y2 - y1 + 1
+	rect.X = int32(x1)
+	rect.Y = int32(y1)
+	rect.W = int32(x2 - x1 + 1)
+	rect.H = int32(y2 - y1 + 1)
 
 	/*
 	 * Draw
@@ -147,44 +151,63 @@ func boxRGBA(renderer *sdl.Renderer, x1, y1, x2, y2 int, r, g, b, a uint8) bool 
 	} else {
 		bm = sdl.BLENDMODE_BLEND
 	}
-	result := renderer.SetDrawBlendMode(renderer, bm)
-	result |= renderer.SetDrawColor(renderer, r, g, b, a)
-	result |= renderer.FillRect(renderer, &rect)
-	return result
+	err := renderer.SetDrawBlendMode(bm)
+	if err == nil {
+		err = renderer.SetDrawColor(r, g, b, a)
+	}
+	if err == nil {
+		err = renderer.FillRect(&rect)
+	}
+	return err
 }
 
-func pixelRGBA(renderer *sdl.Renderer, x, y int, r, g, b, a uint8) bool {
+func pixelRGBA(renderer *sdl.Renderer, x, y int, r, g, b, a uint8) error {
+	var bm sdl.BlendMode
 	if a == 255 {
 		bm = sdl.BLENDMODE_NONE
 	} else {
 		bm = sdl.BLENDMODE_BLEND
 	}
-	result := renderer.SetDrawBlendMode(renderer, bm)
-	result |= renderer.SetDrawColor(renderer, r, g, b, a)
-	result |= renderer.DrawPoint(renderer, x, y)
-	return result
+	err := renderer.SetDrawBlendMode(bm)
+	if err == nil {
+		err = renderer.SetDrawColor(r, g, b, a)
+	}
+	if err == nil {
+		err = renderer.DrawPoint(x, y)
+	}
+	return err
 }
 
-func vlineRGBA(renderer *sdl.Renderer, x, y1, y2 int, r, g, b, a uint8) bool {
+func vlineRGBA(renderer *sdl.Renderer, x, y1, y2 int, r, g, b, a uint8) error {
+	var bm sdl.BlendMode
 	if a == 255 {
 		bm = sdl.BLENDMODE_NONE
 	} else {
 		bm = sdl.BLENDMODE_BLEND
 	}
-	result := renderer.SetDrawBlendMode(renderer, bm)
-	result |= renderer.SetDrawColor(renderer, r, g, b, a)
-	result |= renderer.DrawLine(renderer, x, y1, x, y2)
-	return result
+	err := renderer.SetDrawBlendMode(bm)
+	if err == nil {
+		err = renderer.SetDrawColor(r, g, b, a)
+	}
+	if err == nil {
+		err = renderer.DrawLine(x, y1, x, y2)
+	}
+	return err
 }
 
-func hlineRGBA(renderer *sdl.Renderer, x1, x2, y int, r, g, b, a uint8) bool {
+func hlineRGBA(renderer *sdl.Renderer, x1, x2, y int, r, g, b, a uint8) error {
+	var bm sdl.BlendMode
 	if a == 255 {
 		bm = sdl.BLENDMODE_NONE
 	} else {
 		bm = sdl.BLENDMODE_BLEND
 	}
-	result := renderer.SetDrawBlendMode(renderer, bm)
-	result |= renderer.SetDrawColor(renderer, r, g, b, a)
-	result |= renderer.DrawLine(renderer, x1, y, x2, y)
-	return result
+	err := renderer.SetDrawBlendMode(bm)
+	if err == nil {
+		err = renderer.SetDrawColor(r, g, b, a)
+	}
+	if err == nil {
+		err = renderer.DrawLine(x1, y, x2, y)
+	}
+	return err
 }
