@@ -21,6 +21,25 @@ func (this EnemySet) draw() {
 	}
 }
 
+type EatTimer struct {
+	when      time.Duration
+	lastEaten time.Time
+}
+
+func NewEatTimer(when time.Duration) *EatTimer {
+	this := new(EatTimer)
+	this.lastEaten = time.Now()
+	return this
+}
+
+func (this EatTimer) timeToEat() bool {
+	return this.lastEaten.Add(this.when) > time.Now()
+}
+
+func (this *EatTimer) eating() {
+	this.lastEaten = time.Now()
+}
+
 type Enemy struct {
 	position   WindowPos
 	direction  float32
@@ -28,6 +47,7 @@ type Enemy struct {
 	stopMoving bool
 	target     BoardPos
 	board      *Board
+	eatTimer   *EatTimer
 }
 
 func NewEnemy(enemySet EnemySet, board *Board) *Enemy {
@@ -65,6 +85,21 @@ func (this *Enemy) draw() {
 
 func (this *Enemy) move() {
 
+	if next to a wall {
+		is it time to eat? {
+			eat wall
+		}
+	} else {
+		is the target not valid {
+			choose a new target
+		}
+
+		move towards target, if possible
+
+	}
+
+
+	/*
 	if this.board.get(this.target) == 0 {
 		// choose a new target
 		this.target = this.board.getRandomWallPosition()
@@ -95,6 +130,8 @@ func (this *Enemy) move() {
 		// empty space, move there
 		this.position = nextStep
 	}
+
+	*/
 
 }
 
