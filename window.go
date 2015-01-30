@@ -9,6 +9,10 @@ const CELL_SIZE = 20 // pixels across a square Cell
 
 var renderer *sdl.Renderer
 
+func screenToBoardPos(v Vector) Vector {
+	return Vector{v.x / CELL_SIZE, vy / CELL_SIZE}
+}
+
 func initWindow() {
 
 	if sdl.Init(sdl.INIT_VIDEO) < 0 {

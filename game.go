@@ -76,6 +76,7 @@ func (this *Game) whenMouseMoves(event *sdl.MouseMotionEvent) {
 
 func (this *Game) whenMousePressed(event *sdl.MouseButtonEvent) {
 	if this.board.dropWall(this.currentWall) {
+		this.enemySet.wallKills(this.currentWall)
 		this.pickRandomWallt()
 	}
 }

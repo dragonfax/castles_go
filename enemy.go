@@ -2,6 +2,21 @@ package main
 
 type EnemySet map[*Enemy]bool
 
+func (this *EnemySet) wallKills(wall Wall) {
+	for e,_ := range this {
+		bpos := screenToBoardPos(e.position)
+		if bpos == wall.position {
+			e.wallkill()
+		}
+	}
+}
+
+func (this *EnemySet) draw() {
+	for e,_ := range this {
+		e.draw()
+	}
+}
+
 type Enemy struct {
 	position  Vector
 	direction float32
