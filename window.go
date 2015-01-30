@@ -9,6 +9,7 @@ import (
 const CELL_SIZE = 20 // pixels across a square Cell
 
 var renderer *sdl.Renderer
+var window *sdl.Window
 
 func screenToBoardPos(v Vector) Vector {
 	return Vector{v.x / CELL_SIZE, v.y / CELL_SIZE}
@@ -24,7 +25,8 @@ func initWindow() {
 		panic(fmt.Sprintf(" SDLInitFailedException( Unable to initialize SDL: %v", sdl.GetError()))
 	}
 
-	window, renderer, err := sdl.CreateWindowAndRenderer(640, 480, 0)
+	var err error
+	window, renderer, err = sdl.CreateWindowAndRenderer(640, 480, 0)
 	window.SetTitle("Castles")
 	if err != nil {
 		panic(fmt.Sprintf("SDLInitFailedException (Unable to create SDL screen: %v", sdl.GetError()))
@@ -68,11 +70,17 @@ func windowEventsLoop() {
 }
 
 func drawFilledRectangle(x, y, width, height int, color [4]uint8) {
-	boxRGBA(renderer, x, y, x+width, y+height, color[0], color[1], color[2], color[3])
+	err := boxRGBA(renderer, x, y, x+width, y+height, color[0], color[1], color[2], color[3])
+	if err != nil {
+		panic(err)
+	}
 }
 
 func drawRectangle(x, y, width, height int, color [4]uint8) {
-	rectangleRGBA(renderer, x, y, x+width, y+height, color[0], color[1], color[2], color[3])
+	err := rectangleRGBA(renderer, x, y, x+width, y+height, color[0], color[1], color[2], color[3])
+	if err != nil {
+		panic(err)
+	}
 }
 
 func blue(r uint8) [4]uint8 {

@@ -80,9 +80,7 @@ func (this *Game) pickRandomWall() {
 }
 
 func (this *Game) whenMouseMoves(event *sdl.MouseMotionEvent) {
-	/*
-		move wall position (on screen)
-	*/
+	this.currentWall.position = screenToBoardPos(Vector{int(event.X), int(event.Y)})
 }
 
 func (this *Game) whenMousePressed(event *sdl.MouseButtonEvent) {
