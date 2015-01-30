@@ -72,16 +72,18 @@ func (this *Enemy) move() {
 
 	nextStep := WindowPos{}
 
-	if this.target.x > this.position.x {
-		nextStep.x = this.target.x + ENEMY_SIZE
+	targetWindowPos := boardToWindowPos(this.target)
+
+	if targetWindowPos.x > this.position.x {
+		nextStep.x = this.position.x + ENEMY_SIZE
 	} else {
-		nextStep.x = this.target.x - ENEMY_SIZE
+		nextStep.x = this.position.x - ENEMY_SIZE
 	}
 
-	if this.target.y > this.position.y {
-		nextStep.y = this.target.y + ENEMY_SIZE
+	if targetWindowPos.y > this.position.y {
+		nextStep.y = this.position.y + ENEMY_SIZE
 	} else {
-		nextStep.y = this.target.y - ENEMY_SIZE
+		nextStep.y = this.position.y - ENEMY_SIZE
 	}
 
 	bp := windowToBoardPos(nextStep)
