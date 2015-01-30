@@ -1,10 +1,17 @@
 package main
 
+import (
+	"math/rand"
+	"time"
+
+	"github.com/veandco/go-sdl2/sdl"
+)
+
 type Game struct {
 	currentWall Wall
-	board Board
-	enemySet EnemySet
-	drawTicker *time.Ticker
+	board       Board
+	enemySet    EnemySet
+	drawTicker  *time.Ticker
 	enemyTicker *time.Ticker
 }
 
@@ -33,8 +40,10 @@ func (this *Game) draw() {
 }
 
 func (this *Game) drawLoop() {
+	waitC := make(WaitChannel)
 	for {
-		this.draw()
+		QueueMain(this.draw, waitC)
+		<-waitC
 		<-this.drawTicker
 	}
 }
@@ -54,12 +63,12 @@ func (this *Game) inputLoop() {
 	eventC := GetEventReceiver()
 	for {
 		select {
-			case event := <- eventC:
+		case event := <-eventC:
 			switch e := event.(type) {
-				case *sdl.MouseMotionEvent:
-					this.whenMouseMoves(e)
-				case *sdl.MouseButtonEvent:
-					this.whenMousePressed(e)
+			case *sdl.MouseMotionEvent:
+				this.whenMouseMoves(e)
+			case *sdl.MouseButtonEvent:
+				this.whenMousePressed(e)
 			}
 		}
 	}
@@ -67,11 +76,13 @@ func (this *Game) inputLoop() {
 
 func (this *Game) pickRandomWall() {
 	wtype := WallType(rand.Int() % NUM_WALLTYPES)
-	this.currentWall = NewWall(wtype,this.currentWall.position)
+	this.currentWall = NewWall(wtype, this.currentWall.position)
 }
 
 func (this *Game) whenMouseMoves(event *sdl.MouseMotionEvent) {
-	move wall position (on screen)
+	/*
+		move wall position (on screen)
+	*/
 }
 
 func (this *Game) whenMousePressed(event *sdl.MouseButtonEvent) {

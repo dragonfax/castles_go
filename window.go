@@ -1,3 +1,4 @@
+package main
 
 import (
 	"fmt"
@@ -10,7 +11,11 @@ const CELL_SIZE = 20 // pixels across a square Cell
 var renderer *sdl.Renderer
 
 func screenToBoardPos(v Vector) Vector {
-	return Vector{v.x / CELL_SIZE, vy / CELL_SIZE}
+	return Vector{v.x / CELL_SIZE, v.y / CELL_SIZE}
+}
+
+func boardToScreenPos(sv Vector) Vector {
+	return Vector{sv.x * CELL_SIZE, sv.y * CELL_SIZE}
 }
 
 func initWindow() {
@@ -62,3 +67,18 @@ func windowEventsLoop() {
 	}
 }
 
+func drawFilledRectangle(x, y, width, height int, color [4]uint8) {
+	boxRGBA(renderer, x, y, x+width, y+height, color[0], color[1], color[2], color[3])
+}
+
+func drawRectangle(x, y, width, height int, color [4]uint8) {
+	rectangleRGBA(renderer, x, y, x+width, y+height, color[0], color[1], color[2], color[3])
+}
+
+func blue(r int) [4]uint8 {
+	return [4]uint8{0, 0, r + 100, 255}
+}
+
+func black() [4]uint8 {
+	return [4]uint8{0, 0, 0, 255}
+}

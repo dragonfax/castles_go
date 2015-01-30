@@ -19,72 +19,81 @@ const (
 )
 const NUM_WALLTYPES = int(T) + 1
 
-var wallShapes = [][][]int{ 
+var wallShapes = [][][]int{
 
 	// Left L
 	[][]int{
-		[]int{1,0},
-		[]int{1,1},
-		[]int{1,2},
-		[]int{0,2}
+		[]int{1, 0},
+		[]int{1, 1},
+		[]int{1, 2},
+		[]int{0, 2},
 	},
 
 	// Right L
 	[][]int{
-		[]int{0,0},
-		[]int{0,1},
-		[]int{0,2},
-		[]int{1,2}
+		[]int{0, 0},
+		[]int{0, 1},
+		[]int{0, 2},
+		[]int{1, 2},
 	},
 
 	// Dot
 	[][]int{
-		[]int{0,0} 
+		[]int{0, 0},
 	},
 
 	// Straight
 	[][]int{
-		[]int{0,0},
-		[]int{0,1},
-		[]int{0,2},
-		[]int{0,3}
+		[]int{0, 0},
+		[]int{0, 1},
+		[]int{0, 2},
+		[]int{0, 3},
 	},
 
 	// RZig
 	[][]int{
-		[]int{0,0},
-		[]int{0,1},
-		[]int{1,1},
-		[]int{1,2}
+		[]int{0, 0},
+		[]int{0, 1},
+		[]int{1, 1},
+		[]int{1, 2},
 	},
-	
+
 	// LZig
 	[][]int{
-		[]int{1,0},
-		[]int{1,1},
-		[]int{0,1},
-		[]int{0,2} 
+		[]int{1, 0},
+		[]int{1, 1},
+		[]int{0, 1},
+		[]int{0, 2},
 	},
-	
+
 	// T
 	[][]int{
-		[]int{0,0},
-		[]int{0,1},
-		[]int{1,1},
-		[]int{0,2} 
+		[]int{0, 0},
+		[]int{0, 1},
+		[]int{1, 1},
+		[]int{0, 2},
 	},
-	
 }
 
 type Wall struct {
-	position    Vector
-	wType       WallType
+	position Vector
+	wType    WallType
 }
 
 func (this Wall) draw() {
 	screenPos := boardToScreenPos(this.position)
-	drawFilledRectangle(screenPos.x,screenPos.y,CELL_SIZE,CELL_SIZE,blue(color))
-	drawRectangle(screenPos.x,screenPos.y,CELL_SIZE,CELL_SIZE,black())
+	color := this.wallCells[wx*wy]
+	drawFilledRectangle(screenPos.x, screenPos.y, CELL_SIZE, CELL_SIZE, blue(100))
+	drawRectangle(screenPos.x, screenPos.y, CELL_SIZE, CELL_SIZE, black())
+}
+
+func (this *Wall) draw() {
+	for _, p := range wallShapes[this.wType] {
+		wx := this.x + p[0]
+		wy := this.y + p[1]
+		drawFilledRectangle(wx, wy, CELL_SIZE, CELL_SIZE, blue(100))
+		drawRectangle(wx, wy, CELL_SIZE, CELL_SIZE, black())
+	}
 }
 
 type Board struct {
@@ -93,6 +102,7 @@ type Board struct {
 
 func NewBoard() *Board {
 	this := new(Board)
+	return this
 }
 
 func (this *Board) draw() {
@@ -129,5 +139,3 @@ func (this *Board) dropWall(wall Wall) bool {
 
 	return false
 }
-
-
