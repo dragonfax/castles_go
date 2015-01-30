@@ -11,14 +11,6 @@ const CELL_SIZE = 20 // pixels across a square Cell
 var renderer *sdl.Renderer
 var window *sdl.Window
 
-func windowToBoardPos(v WindowPos) BoardPos {
-	return BoardPos{v.x / CELL_SIZE, v.y / CELL_SIZE}
-}
-
-func boardToWindowPos(sv BoardPos) WindowPos {
-	return WindowPos{sv.x * CELL_SIZE, sv.y * CELL_SIZE}
-}
-
 func initWindow() {
 
 	if sdl.Init(sdl.INIT_VIDEO) < 0 {

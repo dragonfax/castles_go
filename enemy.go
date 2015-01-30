@@ -11,7 +11,7 @@ type EnemySet map[*Enemy]bool
 
 func (this EnemySet) wallKills(wall Wall) {
 	for e, _ := range this {
-		bpos := windowToBoardPos(e.position)
+		bpos := e.position.toBoard()
 		if bpos == wall.position {
 			e.wallkill()
 		}
@@ -102,22 +102,45 @@ func (this *Enemy) draw() {
 	drawFilledRectangle(this.position, ENEMY_SIZE, ENEMY_SIZE, red())
 }
 
+const EAT_RANGE = 15 // roughly sqrt(((CELL_SIZE/2)^2)*2) or distance from center of cell to a corner
+
 func (this *Enemy) inEatRange(wallPos BoardPos) {
 	// if our boundries (plus a little) collide with those boundaries
 
-	return this.eatCollision().collidsWidth(this.board.wallCollision(wallPos))
+	return this.position.dist(wallPos.toWindowCenter()) < EAT_RANGE
+}
+
+func (this *Enemy) moveTowards(wallPos WindowPos) {
+
+	newPos := this.position
+
+	if wallPos.x < this.position.x {
+		newPos.x -= 1
+	} else if wallPos.x > this.position.x {
+		newPos.x += 1
+	}
+
+	if wallPos.y < this.position.y {
+		newPos.y -= 1
+	} else if wallPos.y > this.position.y {
+		newPos.y += 1
+	}
+
+	if nothing collides with newPos {
+		this.position = newPos
+	}
 }
 
 func (this *Enemy) move() {
 
-	wallPos := this.board.nearestWalPos(windowToBoardPos(this.position))
+	wallPos := this.board.nearestWallPos(windowToBoardPos(this.position))
 	if this.inEatRange(wallPos) {
 		if this.eatTimer.timeToEat() {
 			this.eatTimer.eating()
 			this.board.eat(wallPos)
 		}
 	} else {
-		this.moveTowards(wallPos)
+		this.moveTowards(wallPos.toWindowCenter())
 	}
 
 }

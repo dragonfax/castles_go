@@ -84,7 +84,7 @@ func (this *Wall) draw() {
 	for _, p := range wallShapes[this.wType] {
 		bx := this.position.x + p[0]
 		by := this.position.y + p[1]
-		wv := boardToWindowPos(BoardPos{bx, by})
+		wv := BoardPos{bx, by}.toWindowUpLeft()
 		drawFilledRectangle(wv, CELL_SIZE, CELL_SIZE, blue(255))
 		drawRectangle(wv, CELL_SIZE, CELL_SIZE, black())
 	}
@@ -150,7 +150,7 @@ func (this *Board) draw() {
 			p.x = x
 			p.y = y
 			health := this.get(p)
-			wv := boardToWindowPos(p)
+			wv := p.toWindowUpLeft()
 			drawFilledRectangle(wv, CELL_SIZE, CELL_SIZE, blue(uint8(float32(health)*(255/WALL_MAX_HEALTH))))
 		}
 	}
@@ -182,4 +182,22 @@ func (this *Board) dropWall(wall Wall) bool {
 	}
 
 	return false
+}
+
+func (this *Board) nearestWallPos(enemyPos BoardPos) BoardPos {
+	lowestDist := 9999
+	closestWallPos := Vector{BOARD_WIDTH_CELLS / 2, BOARD_HEIGHT_CELLS / 2}
+	for x := 0; x < BOARD_WIDTH_CELLS; x++ {
+		for y := 0; y < BOARD_HEIGHT_CELLS; y++ {
+			bp := BoardPos{x, y}.dist(enemyPos)
+			if this.get(pb) != 0 {
+				dist := bp.dist(enemyPos)
+				if dist < lowestDist {
+					lowestDist = dist
+					closestWallPos = bp
+				}
+			}
+		}
+	}
+	return bp
 }
