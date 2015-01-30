@@ -1,6 +1,9 @@
 package main
 
-import "time"
+import (
+	"math/rand"
+	"time"
+)
 
 const ENEMY_SIZE = CELL_SIZE / 5
 
@@ -33,7 +36,7 @@ func NewEatTimer(when time.Duration) *EatTimer {
 }
 
 func (this EatTimer) timeToEat() bool {
-	return this.lastEaten.Add(this.when) > time.Now()
+	return this.lastEaten.Add(this.when).Before(time.Now())
 }
 
 func (this *EatTimer) eating() {
@@ -45,7 +48,6 @@ type Enemy struct {
 	direction  float32
 	enemySet   EnemySet
 	stopMoving bool
-	target     BoardPos
 	board      *Board
 	eatTimer   *EatTimer
 }
@@ -53,7 +55,7 @@ type Enemy struct {
 func NewEnemy(enemySet EnemySet, board *Board) *Enemy {
 	this := new(Enemy)
 
-	this.moveToEdgeOfMap()
+	this.moveToRandomEdgeOfMap()
 
 	go this.moveLoop()
 	this.enemySet = enemySet
@@ -62,8 +64,25 @@ func NewEnemy(enemySet EnemySet, board *Board) *Enemy {
 	return this
 }
 
-func (this *Enemy) moveToEdgeOfMap() {
-	this.position = WindowPos{0, 0}
+func (this *Enemy) moveToRandomEdgeOfMap() {
+
+	pos := WindowPos{rand.Intn(640), rand.Intn(480)}
+
+	// which edge?
+	switch rand.Intn(5) {
+	case 0:
+		pos.x = 0
+	case 1:
+		pos.x = 640
+	case 2:
+		pos.y = 0
+	case 3:
+		pos.y = 480
+	default:
+		panic("my math is bad")
+	}
+
+	this.position = pos
 }
 
 func (this *Enemy) close() {
@@ -83,55 +102,23 @@ func (this *Enemy) draw() {
 	drawFilledRectangle(this.position, ENEMY_SIZE, ENEMY_SIZE, red())
 }
 
+func (this *Enemy) inEatRange(wallPos BoardPos) {
+	// if our boundries (plus a little) collide with those boundaries
+
+	return this.eatCollision().collidsWidth(this.board.wallCollision(wallPos))
+}
+
 func (this *Enemy) move() {
 
-	if next to a wall {
-		is it time to eat? {
-			eat wall
+	wallPos := this.board.nearestWalPos(windowToBoardPos(this.position))
+	if this.inEatRange(wallPos) {
+		if this.eatTimer.timeToEat() {
+			this.eatTimer.eating()
+			this.board.eat(wallPos)
 		}
 	} else {
-		is the target not valid {
-			choose a new target
-		}
-
-		move towards target, if possible
-
+		this.moveTowards(wallPos)
 	}
-
-
-	/*
-	if this.board.get(this.target) == 0 {
-		// choose a new target
-		this.target = this.board.getRandomWallPosition()
-	}
-
-	nextStep := WindowPos{}
-
-	targetWindowPos := boardToWindowPos(this.target)
-
-	if targetWindowPos.x > this.position.x {
-		nextStep.x = this.position.x + ENEMY_SIZE
-	} else {
-		nextStep.x = this.position.x - ENEMY_SIZE
-	}
-
-	if targetWindowPos.y > this.position.y {
-		nextStep.y = this.position.y + ENEMY_SIZE
-	} else {
-		nextStep.y = this.position.y - ENEMY_SIZE
-	}
-
-	bp := windowToBoardPos(nextStep)
-
-	if this.board.get(bp) != 0 {
-		// wall in the way, eat it.
-		this.board.eat(bp)
-	} else {
-		// empty space, move there
-		this.position = nextStep
-	}
-
-	*/
 
 }
 

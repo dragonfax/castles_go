@@ -120,7 +120,13 @@ func (this *Board) set(b BoardPos, value uint8) {
 }
 
 func (this *Board) eat(p BoardPos) {
-	this.set(p, this.get(p)-5)
+	health := this.get(p)
+	if health >= 5 {
+		health = health - 5
+	} else {
+		health = 0
+	}
+	this.set(p, health)
 }
 
 func (this *Board) getRandomWallPosition() BoardPos {
