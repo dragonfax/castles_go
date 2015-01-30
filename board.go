@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 const BOARD_WIDTH_CELLS = 100
 const BOARD_HEIGHT_CELLS = 80
 const BOARD_NUM_CELLS = BOARD_WIDTH_CELLS * BOARD_HEIGHT_CELLS
@@ -101,11 +99,18 @@ func NewBoard() *Board {
 	return this
 }
 
+func (this *Board) get(x, y int) uint8 {
+	return this.wallCells[x*BOARD_HEIGHT_CELLS+y]
+}
+
+func (this *Board) set(x, y int, value uint8) {
+	this.wallCells[x*BOARD_HEIGHT_CELLS+y] = value
+}
+
 func (this *Board) draw() {
 	for x := 0; x < BOARD_WIDTH_CELLS; x++ {
 		for y := 0; y < BOARD_HEIGHT_CELLS; y++ {
-			fmt.Printf("indexing %d,%d which is in cell %d and %d\n", x, y, x*BOARD_WIDTH_CELLS+y, BOARD_NUM_CELLS)
-			color := this.wallCells[x*BOARD_WIDTH_CELLS+y]
+			color := this.get(x, y)
 			bv := boardToScreenPos(Vector{x, y})
 			drawFilledRectangle(bv.x, bv.y, CELL_SIZE, CELL_SIZE, blue(color))
 		}
@@ -117,7 +122,7 @@ func (this *Board) isWallClear(wall Wall) bool {
 	for _, p := range wallShapes[wall.wType] {
 		wx := wall.position.x + p[0]
 		wy := wall.position.y + p[1]
-		if this.wallCells[wx*BOARD_WIDTH_CELLS+wy] != 0 {
+		if this.get(wx, wy) != 0 {
 			return false
 		}
 	}
@@ -130,7 +135,7 @@ func (this *Board) dropWall(wall Wall) bool {
 		for _, p := range wallShapes[wall.wType] {
 			wx := wall.position.x + p[0]
 			wy := wall.position.y + p[1]
-			this.wallCells[wx*BOARD_WIDTH_CELLS+wy] = WALL_MAX_HEALTH
+			this.set(wx, wy, WALL_MAX_HEALTH)
 		}
 		return true
 	}
