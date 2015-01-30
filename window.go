@@ -38,6 +38,7 @@ func initWindow() {
 }
 
 func clearWindow() {
+	renderer.SetDrawColor(0, 0, 0, 255)
 	renderer.Clear()
 }
 
