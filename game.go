@@ -80,7 +80,7 @@ func (this *Game) pickRandomWall() {
 }
 
 func (this *Game) whenMouseMoves(event *sdl.MouseMotionEvent) {
-	this.currentWall.position = windowToBoardPos(WindowPos{int(event.X), int(event.Y)})
+	this.currentWall.position = WindowPos{int(event.X), int(event.Y)}.toBoard()
 }
 
 func (this *Game) whenMousePressed(event *sdl.MouseButtonEvent) {

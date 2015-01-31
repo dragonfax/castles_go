@@ -185,12 +185,12 @@ func (this *Board) dropWall(wall Wall) bool {
 }
 
 func (this *Board) nearestWallPos(enemyPos BoardPos) BoardPos {
-	lowestDist := 9999
-	closestWallPos := Vector{BOARD_WIDTH_CELLS / 2, BOARD_HEIGHT_CELLS / 2}
+	lowestDist := 9999.0
+	closestWallPos := BoardPos{BOARD_WIDTH_CELLS / 2, BOARD_HEIGHT_CELLS / 2}
 	for x := 0; x < BOARD_WIDTH_CELLS; x++ {
 		for y := 0; y < BOARD_HEIGHT_CELLS; y++ {
-			bp := BoardPos{x, y}.dist(enemyPos)
-			if this.get(pb) != 0 {
+			bp := BoardPos{x, y}
+			if this.get(bp) != 0 {
 				dist := bp.dist(enemyPos)
 				if dist < lowestDist {
 					lowestDist = dist
@@ -199,5 +199,5 @@ func (this *Board) nearestWallPos(enemyPos BoardPos) BoardPos {
 			}
 		}
 	}
-	return bp
+	return closestWallPos
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math"
 	"math/rand"
 	"time"
 )
@@ -61,6 +62,7 @@ func NewEnemy(enemySet EnemySet, board *Board) *Enemy {
 	this.enemySet = enemySet
 	this.enemySet[this] = true
 	this.board = board
+	this.eatTimer = NewEatTimer(time.Second / 5)
 	return this
 }
 
@@ -69,7 +71,7 @@ func (this *Enemy) moveToRandomEdgeOfMap() {
 	pos := WindowPos{rand.Intn(640), rand.Intn(480)}
 
 	// which edge?
-	switch rand.Intn(5) {
+	switch rand.Intn(4) {
 	case 0:
 		pos.x = 0
 	case 1:
@@ -90,7 +92,7 @@ func (this *Enemy) close() {
 }
 
 func (this *Enemy) moveLoop() {
-	moveTicker := time.NewTicker(time.Second / 5)
+	moveTicker := time.NewTicker(time.Second / 10)
 	for !this.stopMoving {
 		this.move()
 		<-moveTicker.C
@@ -102,9 +104,9 @@ func (this *Enemy) draw() {
 	drawFilledRectangle(this.position, ENEMY_SIZE, ENEMY_SIZE, red())
 }
 
-const EAT_RANGE = 15 // roughly sqrt(((CELL_SIZE/2)^2)*2) or distance from center of cell to a corner
+var EAT_RANGE = math.Sqrt(((CELL_SIZE / 2) ^ 2) * 2)
 
-func (this *Enemy) inEatRange(wallPos BoardPos) {
+func (this *Enemy) inEatRange(wallPos BoardPos) bool {
 	// if our boundries (plus a little) collide with those boundaries
 
 	return this.position.dist(wallPos.toWindowCenter()) < EAT_RANGE
@@ -126,14 +128,61 @@ func (this *Enemy) moveTowards(wallPos WindowPos) {
 		newPos.y += 1
 	}
 
-	if nothing collides with newPos {
+	if !this.checkCollisions(newPos) {
 		this.position = newPos
 	}
 }
 
+func (this *Enemy) collidesWith(e *Enemy) bool {
+
+	tb := this.bounds()
+	eb := e.bounds()
+
+	if tb.LowRight.x < eb.UpLeft.x || tb.UpLeft.x > eb.LowRight.x {
+		return false
+	}
+
+	if tb.LowRight.y < eb.UpLeft.y || tb.UpLeft.y > eb.LowRight.y {
+		return false
+	}
+
+	return true
+
+}
+
+func (this *Enemy) bounds() Bounds {
+	upLeftCorner := this.position
+	lowRightCorner := WindowPos{this.position.x + ENEMY_SIZE, this.position.y + ENEMY_SIZE}
+	return Bounds{upLeftCorner, lowRightCorner}
+}
+
+func (this *Enemy) checkCollisions(pos WindowPos) bool {
+
+	b := this.bounds()
+
+	// check against board
+	if this.board.get(b.UpLeft.toBoard()) != 0 {
+		return true
+	}
+	if this.board.get(b.LowRight.toBoard()) != 0 {
+		return true
+	}
+
+	// check against other enemies
+	for e, _ := range this.enemySet {
+		if e != this {
+			if this.collidesWith(e) {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func (this *Enemy) move() {
 
-	wallPos := this.board.nearestWallPos(windowToBoardPos(this.position))
+	wallPos := this.board.nearestWallPos(this.position.toBoard())
 	if this.inEatRange(wallPos) {
 		if this.eatTimer.timeToEat() {
 			this.eatTimer.eating()
