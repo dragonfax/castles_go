@@ -92,7 +92,7 @@ func (this *Enemy) close() {
 }
 
 func (this *Enemy) moveLoop() {
-	moveTicker := time.NewTicker(time.Second / 10)
+	moveTicker := time.NewTicker(time.Second / 20)
 	for !this.stopMoving {
 		this.move()
 		<-moveTicker.C
