@@ -7,7 +7,7 @@ type Vector struct {
 }
 
 func (this Vector) dist(v Vector) float64 {
-	return math.Sqrt(float64((this.x-v.x)^2) * 2)
+	return math.Sqrt(math.Pow(float64(this.x-v.x), 2) + math.Pow(float64(this.y-v.y), 2))
 }
 
 type WindowPos Vector
@@ -42,7 +42,6 @@ func (this BoardPos) dist(v BoardPos) float64 {
 	return Vector{this.x, this.y}.dist(Vector{v.x, v.y})
 }
 
-type Bounds struct {
-	UpLeft   WindowPos
-	LowRight WindowPos
+func (this BoardPos) isZero() bool {
+	return this.x == 0 && this.y == 0
 }

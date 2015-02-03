@@ -186,7 +186,7 @@ func (this *Board) dropWall(wall Wall) bool {
 
 func (this *Board) nearestWallPos(enemyPos BoardPos) BoardPos {
 	lowestDist := 9999.0
-	closestWallPos := BoardPos{BOARD_WIDTH_CELLS / 2, BOARD_HEIGHT_CELLS / 2}
+	closestWallPos := BoardPos{}
 	for x := 0; x < BOARD_WIDTH_CELLS; x++ {
 		for y := 0; y < BOARD_HEIGHT_CELLS; y++ {
 			bp := BoardPos{x, y}

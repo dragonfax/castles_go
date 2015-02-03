@@ -1,7 +1,7 @@
 package main
 
 import (
-	"math"
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -104,12 +104,10 @@ func (this *Enemy) draw() {
 	drawFilledRectangle(this.position, ENEMY_SIZE, ENEMY_SIZE, red())
 }
 
-var EAT_RANGE = math.Sqrt(((CELL_SIZE / 2) ^ 2) * 2)
-
 func (this *Enemy) inEatRange(wallPos BoardPos) bool {
 	// if our boundries (plus a little) collide with those boundaries
 
-	return this.position.dist(wallPos.toWindowCenter()) < EAT_RANGE
+	return this.position.dist(wallPos.toWindowCenter()) < CELL_SIZE
 }
 
 func (this *Enemy) moveTowards(wallPos WindowPos) {
@@ -133,45 +131,26 @@ func (this *Enemy) moveTowards(wallPos WindowPos) {
 	}
 }
 
-func (this *Enemy) collidesWith(e *Enemy) bool {
-
-	tb := this.bounds()
-	eb := e.bounds()
-
-	if tb.LowRight.x < eb.UpLeft.x || tb.UpLeft.x > eb.LowRight.x {
-		return false
-	}
-
-	if tb.LowRight.y < eb.UpLeft.y || tb.UpLeft.y > eb.LowRight.y {
-		return false
-	}
-
-	return true
-
-}
-
 func (this *Enemy) bounds() Bounds {
-	upLeftCorner := this.position
-	lowRightCorner := WindowPos{this.position.x + ENEMY_SIZE, this.position.y + ENEMY_SIZE}
-	return Bounds{upLeftCorner, lowRightCorner}
+	return boundingSquare(this.position, ENEMY_SIZE)
 }
 
 func (this *Enemy) checkCollisions(pos WindowPos) bool {
 
-	b := this.bounds()
-
 	// check against board
-	if this.board.get(b.UpLeft.toBoard()) != 0 {
+	if this.board.get(this.position.toBoard()) != 0 {
 		return true
 	}
-	if this.board.get(b.LowRight.toBoard()) != 0 {
+	if this.board.get(this.position.toBoard()) != 0 {
 		return true
 	}
 
 	// check against other enemies
+	b := this.bounds()
 	for e, _ := range this.enemySet {
 		if e != this {
-			if this.collidesWith(e) {
+			eb := e.bounds()
+			if b.collidesWith(eb) {
 				return true
 			}
 		}
@@ -189,12 +168,15 @@ func (this *Enemy) move() {
 			this.board.eat(wallPos)
 		}
 	} else {
-		this.moveTowards(wallPos.toWindowCenter())
+		if !wallPos.isZero() {
+			this.moveTowards(wallPos.toWindowCenter())
+		}
 	}
 
 }
 
 func (this *Enemy) wallkill() {
 	this.stopMoving = true
+	fmt.Println("enemy wallkilled")
 	delete(this.enemySet, this)
 }
