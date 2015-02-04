@@ -29,8 +29,6 @@ func (this *Castle) eat() {
 
 func (this *Castle) draw() {
 	wv := this.position.toWindowUpLeft()
-	fmt.Println(this.position)
-	fmt.Println(wv)
 	drawFilledRectangle(wv, CELL_SIZE, CELL_SIZE, gold(uint8(this.health)))
 }
 
