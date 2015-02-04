@@ -200,14 +200,22 @@ func (this *Board) isWallClear(wall Wall) bool {
 	return true
 }
 
+func (this Wall) enumerateWallPositions() []BoardPos {
+
+	wallPoints := wallShapes[this.wType]
+	positions := make([]BoardPos, len(wallPoints))
+	for i, p := range wallPoints {
+		positions[i] = BoardPos{this.position.x + p[0], this.position.y + p[1]}
+	}
+
+	return positions
+}
+
 func (this *Board) dropWall(wall Wall) bool {
 
 	if this.isWallClear(wall) {
-		for _, p := range wallShapes[wall.wType] {
-			wx := wall.position.x + p[0]
-			wy := wall.position.y + p[1]
-			w := BoardPos{wx, wy}
-			this.set(w, WALL_MAX_HEALTH)
+		for _, p := range wall.enumerateWallPositions() {
+			this.set(p, WALL_MAX_HEALTH)
 		}
 		return true
 	}
