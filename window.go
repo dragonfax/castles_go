@@ -87,3 +87,7 @@ func black() [4]uint8 {
 func red() [4]uint8 {
 	return [4]uint8{255, 0, 0, 255}
 }
+
+func gold(r uint8) [4]uint8 {
+	return [4]uint8{0, r, r, 255}
+}

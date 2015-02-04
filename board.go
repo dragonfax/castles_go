@@ -1,10 +1,38 @@
 package main
 
-const BOARD_WIDTH_CELLS = 100
-const BOARD_HEIGHT_CELLS = 80
+import "fmt"
+
+const BOARD_WIDTH_CELLS = 40
+const BOARD_HEIGHT_CELLS = 20
 const BOARD_NUM_CELLS = BOARD_WIDTH_CELLS * BOARD_HEIGHT_CELLS
 
 const WALL_MAX_HEALTH = 100
+
+type Castle struct {
+	health   int
+	position BoardPos
+}
+
+func NewCastle() *Castle {
+	this := new(Castle)
+	this.health = 200
+	this.position = BoardPos{BOARD_WIDTH_CELLS / 2, BOARD_HEIGHT_CELLS / 2}
+	return this
+}
+
+func (this *Castle) eat() {
+	this.health -= 1
+	if this.health == 0 {
+		panic("game over, castle dead")
+	}
+}
+
+func (this *Castle) draw() {
+	wv := this.position.toWindowUpLeft()
+	fmt.Println(this.position)
+	fmt.Println(wv)
+	drawFilledRectangle(wv, CELL_SIZE, CELL_SIZE, gold(uint8(this.health)))
+}
 
 type WallType int
 
@@ -92,10 +120,12 @@ func (this *Wall) draw() {
 
 type Board struct {
 	wallCells [BOARD_NUM_CELLS]uint8 // [x*y] = health of cell
+	castle    *Castle
 }
 
 func NewBoard() *Board {
 	this := new(Board)
+	this.castle = NewCastle()
 	return this
 }
 
@@ -104,7 +134,7 @@ func (this *Board) get(p BoardPos) uint8 {
 		panic("requested a coorinate too wide")
 	}
 	if p.y >= BOARD_HEIGHT_CELLS {
-		panic("requested a coorinate too high")
+		panic(fmt.Sprintf("requested a coorinate too high %d", p.y))
 	}
 	return this.wallCells[p.x*BOARD_HEIGHT_CELLS+p.y]
 }
@@ -121,12 +151,14 @@ func (this *Board) set(b BoardPos, value uint8) {
 
 func (this *Board) eat(p BoardPos) {
 	health := this.get(p)
-	if health >= 5 {
-		health = health - 5
-	} else {
-		health = 0
+	if health > 0 {
+		if health >= 5 {
+			health = health - 5
+		} else {
+			health = 0
+		}
+		this.set(p, health)
 	}
-	this.set(p, health)
 }
 
 func (this *Board) getRandomWallPosition() BoardPos {
@@ -154,6 +186,7 @@ func (this *Board) draw() {
 			drawFilledRectangle(wv, CELL_SIZE, CELL_SIZE, blue(uint8(float32(health)*(255/WALL_MAX_HEALTH))))
 		}
 	}
+	this.castle.draw()
 }
 
 func (this *Board) isWallClear(wall Wall) bool {

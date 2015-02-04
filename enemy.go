@@ -68,18 +68,18 @@ func NewEnemy(enemySet EnemySet, board *Board) *Enemy {
 
 func (this *Enemy) moveToRandomEdgeOfMap() {
 
-	pos := WindowPos{rand.Intn(640), rand.Intn(480)}
+	pos := WindowPos{rand.Intn(630), rand.Intn(470)}
 
 	// which edge?
 	switch rand.Intn(4) {
 	case 0:
-		pos.x = 0
+		pos.x = 1
 	case 1:
-		pos.x = 640
+		pos.x = 630
 	case 2:
-		pos.y = 0
+		pos.y = 1
 	case 3:
-		pos.y = 480
+		pos.y = 470
 	default:
 		panic("my math is bad")
 	}
@@ -162,15 +162,19 @@ func (this *Enemy) checkCollisions(pos WindowPos) bool {
 func (this *Enemy) move() {
 
 	wallPos := this.board.nearestWallPos(this.position.toBoard())
-	if this.inEatRange(wallPos) {
+	castlePos := this.board.castle.position
+	if !wallPos.isZero() && this.inEatRange(wallPos) {
 		if this.eatTimer.timeToEat() {
 			this.eatTimer.eating()
 			this.board.eat(wallPos)
 		}
-	} else {
-		if !wallPos.isZero() {
-			this.moveTowards(wallPos.toWindowCenter())
+	} else if this.inEatRange(castlePos) {
+		if this.eatTimer.timeToEat() {
+			this.eatTimer.eating()
+			this.board.castle.eat()
 		}
+	} else {
+		this.moveTowards(castlePos.toWindowCenter())
 	}
 
 }
