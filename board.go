@@ -131,10 +131,10 @@ func NewBoard() *Board {
 
 func (this *Board) get(p BoardPos) uint8 {
 	if p.x >= BOARD_WIDTH_CELLS {
-		panic("requested a coorinate too wide")
+		panic(fmt.Sprintf("requested an x coordinate too wide %d", p.x))
 	}
 	if p.y >= BOARD_HEIGHT_CELLS {
-		panic(fmt.Sprintf("requested a coorinate too high %d", p.y))
+		panic(fmt.Sprintf("requested a y coordinate too high %d", p.y))
 	}
 	return this.wallCells[p.x*BOARD_HEIGHT_CELLS+p.y]
 }

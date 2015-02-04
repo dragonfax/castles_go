@@ -8,6 +8,9 @@ import (
 
 const CELL_SIZE = 20 // pixels across a square Cell
 
+const WINDOW_WIDTH = BOARD_WIDTH_CELLS * CELL_SIZE
+const WINDOW_HEIGHT = BOARD_HEIGHT_CELLS * CELL_SIZE
+
 var renderer *sdl.Renderer
 var window *sdl.Window
 
@@ -18,7 +21,7 @@ func initWindow() {
 	}
 
 	var err error
-	window, renderer, err = sdl.CreateWindowAndRenderer(640, 480, 0)
+	window, renderer, err = sdl.CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, 0)
 	window.SetTitle("Castles")
 	if err != nil {
 		panic(fmt.Sprintf("SDLInitFailedException (Unable to create SDL screen: %v", sdl.GetError()))

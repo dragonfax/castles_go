@@ -68,18 +68,18 @@ func NewEnemy(enemySet EnemySet, board *Board) *Enemy {
 
 func (this *Enemy) moveToRandomEdgeOfMap() {
 
-	pos := WindowPos{rand.Intn(630), rand.Intn(470)}
+	pos := WindowPos{rand.Intn(WINDOW_WIDTH - 1), rand.Intn(WINDOW_HEIGHT - 1)}
 
 	// which edge?
 	switch rand.Intn(4) {
 	case 0:
-		pos.x = 1
+		pos.x = 0
 	case 1:
-		pos.x = 630
+		pos.x = WINDOW_WIDTH - 1
 	case 2:
-		pos.y = 1
+		pos.y = 0
 	case 3:
-		pos.y = 470
+		pos.y = WINDOW_HEIGHT - 1
 	default:
 		panic("my math is bad")
 	}
