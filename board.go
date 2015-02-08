@@ -121,10 +121,11 @@ type Board struct {
 	castle    *Castle
 }
 
-func NewBoard() *Board {
-	this := new(Board)
-	this.castle = NewCastle()
-	return this
+var board Board
+
+func NewBoard() {
+	board = Board{}
+	board.castle = NewCastle()
 }
 
 func (this *Board) get(p BoardPos) uint8 {

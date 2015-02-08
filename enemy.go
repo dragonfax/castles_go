@@ -10,6 +10,12 @@ const ENEMY_SIZE = CELL_SIZE / 5
 
 type EnemySet map[*Enemy]bool
 
+var enemySet EnemySet
+
+func NewEnemySet() {
+	enemySet = make(EnemySet)
+}
+
 func (this EnemySet) wallKills(wall Wall) {
 	for e, _ := range this {
 		bpos := e.position.toBoard()
@@ -47,21 +53,17 @@ func (this *EatTimer) eating() {
 type Enemy struct {
 	position   WindowPos
 	direction  float32
-	enemySet   EnemySet
 	stopMoving bool
-	board      *Board
 	eatTimer   *EatTimer
 }
 
-func NewEnemy(enemySet EnemySet, board *Board) *Enemy {
+func NewEnemy() *Enemy {
 	this := new(Enemy)
 
 	this.moveToRandomEdgeOfMap()
 
 	go this.moveLoop()
-	this.enemySet = enemySet
-	this.enemySet[this] = true
-	this.board = board
+	enemySet[this] = true
 	this.eatTimer = NewEatTimer(time.Second / 5)
 	return this
 }
@@ -88,7 +90,7 @@ func (this *Enemy) moveToRandomEdgeOfMap() {
 }
 
 func (this *Enemy) close() {
-	delete(this.enemySet, this)
+	delete(enemySet, this)
 }
 
 func (this *Enemy) moveLoop() {
@@ -97,7 +99,7 @@ func (this *Enemy) moveLoop() {
 		this.move()
 		<-moveTicker.C
 	}
-	delete(this.enemySet, this)
+	delete(enemySet, this)
 }
 
 func (this *Enemy) draw() {
@@ -138,16 +140,16 @@ func (this *Enemy) bounds() Bounds {
 func (this *Enemy) checkCollisions(pos WindowPos) bool {
 
 	// check against board
-	if this.board.get(this.position.toBoard()) != 0 {
+	if board.get(this.position.toBoard()) != 0 {
 		return true
 	}
-	if this.board.get(this.position.toBoard()) != 0 {
+	if board.get(this.position.toBoard()) != 0 {
 		return true
 	}
 
 	// check against other enemies
 	b := this.bounds()
-	for e, _ := range this.enemySet {
+	for e, _ := range enemySet {
 		if e != this {
 			eb := e.bounds()
 			if b.collidesWith(eb) {
@@ -161,17 +163,17 @@ func (this *Enemy) checkCollisions(pos WindowPos) bool {
 
 func (this *Enemy) move() {
 
-	wallPos := this.board.nearestWallPos(this.position.toBoard())
-	castlePos := this.board.castle.position
+	wallPos := board.nearestWallPos(this.position.toBoard())
+	castlePos := board.castle.position
 	if !wallPos.isZero() && this.inEatRange(wallPos) {
 		if this.eatTimer.timeToEat() {
 			this.eatTimer.eating()
-			this.board.eat(wallPos)
+			board.eat(wallPos)
 		}
 	} else if this.inEatRange(castlePos) {
 		if this.eatTimer.timeToEat() {
 			this.eatTimer.eating()
-			this.board.castle.eat()
+			board.castle.eat()
 		}
 	} else {
 		this.moveTowards(castlePos.toWindowCenter())
@@ -182,5 +184,5 @@ func (this *Enemy) move() {
 func (this *Enemy) wallkill() {
 	this.stopMoving = true
 	fmt.Println("enemy wallkilled")
-	delete(this.enemySet, this)
+	delete(enemySet, this)
 }

@@ -9,8 +9,6 @@ import (
 
 type Game struct {
 	currentWall Wall
-	board       *Board
-	enemySet    EnemySet
 	drawTicker  *time.Ticker
 	enemyTicker *time.Ticker
 }
@@ -19,8 +17,8 @@ func NewGame() *Game {
 	this := new(Game)
 	this.drawTicker = time.NewTicker(time.Second / 60)
 	this.enemyTicker = time.NewTicker(time.Second)
-	this.enemySet = make(EnemySet)
-	this.board = NewBoard()
+	NewEnemySet()
+	NewBoard()
 	this.pickRandomWall()
 	return this
 }
@@ -33,8 +31,8 @@ func (this *Game) run() {
 
 func (this *Game) draw() {
 	clearWindow()
-	this.board.draw()
-	this.enemySet.draw()
+	board.draw()
+	enemySet.draw()
 	this.currentWall.draw()
 	flipWindow()
 }
@@ -49,7 +47,7 @@ func (this *Game) drawLoop() {
 }
 
 func (this *Game) generateEnemy() {
-	NewEnemy(this.enemySet, this.board)
+	NewEnemy()
 }
 
 func (this *Game) generateEnemyLoop() {
@@ -84,8 +82,8 @@ func (this *Game) whenMouseMoves(event *sdl.MouseMotionEvent) {
 }
 
 func (this *Game) whenMousePressed(event *sdl.MouseButtonEvent) {
-	if this.board.dropWall(this.currentWall) {
-		this.enemySet.wallKills(this.currentWall)
+	if board.dropWall(this.currentWall) {
+		enemySet.wallKills(this.currentWall)
 		this.pickRandomWall()
 	}
 }
