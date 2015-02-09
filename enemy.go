@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 	"time"
 )
@@ -14,15 +13,6 @@ var enemySet EnemySet
 
 func NewEnemySet() {
 	enemySet = make(EnemySet)
-}
-
-func (this EnemySet) wallKills(wall Wall) {
-	for e, _ := range this {
-		bpos := e.position.toBoard()
-		if bpos == wall.position {
-			e.wallkill()
-		}
-	}
 }
 
 func (this EnemySet) draw() {
@@ -63,6 +53,7 @@ func NewEnemy() *Enemy {
 	this.moveToRandomEdgeOfMap()
 
 	go this.moveLoop()
+	go this.eventLoop()
 	enemySet[this] = true
 	this.eatTimer = NewEatTimer(time.Second / 5)
 	return this
@@ -87,10 +78,6 @@ func (this *Enemy) moveToRandomEdgeOfMap() {
 	}
 
 	this.position = pos
-}
-
-func (this *Enemy) close() {
-	delete(enemySet, this)
 }
 
 func (this *Enemy) moveLoop() {
@@ -181,8 +168,24 @@ func (this *Enemy) move() {
 
 }
 
-func (this *Enemy) wallkill() {
+func (this *Enemy) close() {
 	this.stopMoving = true
-	fmt.Println("enemy wallkilled")
 	delete(enemySet, this)
+}
+
+func (this *Enemy) eventLoop() {
+	eventC := GetEventReceiver()
+	for !this.stopMoving {
+		select {
+		case event := <-eventC:
+			switch event.(type) {
+			case PeiceDroppedEvent:
+				// collision and wallkill
+				if board.get(this.position.toBoard()) != 0 {
+					this.close()
+				}
+			}
+		}
+	}
+	CloseEventReceiver(eventC)
 }

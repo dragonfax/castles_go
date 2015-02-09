@@ -6,118 +6,6 @@ const BOARD_WIDTH_CELLS = 40
 const BOARD_HEIGHT_CELLS = 20
 const BOARD_NUM_CELLS = BOARD_WIDTH_CELLS * BOARD_HEIGHT_CELLS
 
-const WALL_MAX_HEALTH = 100
-
-type Castle struct {
-	health   int
-	position BoardPos
-}
-
-func NewCastle() *Castle {
-	this := new(Castle)
-	this.health = 200
-	this.position = BoardPos{BOARD_WIDTH_CELLS / 2, BOARD_HEIGHT_CELLS / 2}
-	return this
-}
-
-func (this *Castle) eat() {
-	if this.health > 0 {
-		this.health -= 1
-	}
-	if this.health == 0 {
-		eventSendC <- GameOverEvent{}
-	}
-}
-
-func (this *Castle) draw() {
-	wv := this.position.toWindowUpLeft()
-	drawFilledRectangle(wv, CELL_SIZE, CELL_SIZE, gold(uint8(this.health)))
-}
-
-type WallType int
-
-const (
-	LL WallType = iota
-	RL
-	Dot
-	Straight
-	RZig
-	LZig
-	T
-)
-const NUM_WALLTYPES = int(T) + 1
-
-var wallShapes = [][][]int{
-
-	// Left L
-	[][]int{
-		[]int{1, 0},
-		[]int{1, 1},
-		[]int{1, 2},
-		[]int{0, 2},
-	},
-
-	// Right L
-	[][]int{
-		[]int{0, 0},
-		[]int{0, 1},
-		[]int{0, 2},
-		[]int{1, 2},
-	},
-
-	// Dot
-	[][]int{
-		[]int{0, 0},
-	},
-
-	// Straight
-	[][]int{
-		[]int{0, 0},
-		[]int{0, 1},
-		[]int{0, 2},
-		[]int{0, 3},
-	},
-
-	// RZig
-	[][]int{
-		[]int{0, 0},
-		[]int{0, 1},
-		[]int{1, 1},
-		[]int{1, 2},
-	},
-
-	// LZig
-	[][]int{
-		[]int{1, 0},
-		[]int{1, 1},
-		[]int{0, 1},
-		[]int{0, 2},
-	},
-
-	// T
-	[][]int{
-		[]int{0, 0},
-		[]int{0, 1},
-		[]int{1, 1},
-		[]int{0, 2},
-	},
-}
-
-type Wall struct {
-	position BoardPos
-	wType    WallType
-}
-
-func (this *Wall) draw() {
-	for _, p := range wallShapes[this.wType] {
-		bx := this.position.x + p[0]
-		by := this.position.y + p[1]
-		wv := BoardPos{bx, by}.toWindowUpLeft()
-		drawFilledRectangle(wv, CELL_SIZE, CELL_SIZE, blue(255))
-		drawRectangle(wv, CELL_SIZE, CELL_SIZE, black())
-	}
-}
-
 type Board struct {
 	wallCells [BOARD_NUM_CELLS]uint8 // [x*y] = health of cell
 	castle    *Castle
@@ -128,6 +16,7 @@ var board Board
 func NewBoard() {
 	board = Board{}
 	board.castle = NewCastle()
+	go board.eventLoop()
 }
 
 func (this *Board) get(p BoardPos) uint8 {
@@ -190,42 +79,6 @@ func (this *Board) draw() {
 	this.castle.draw()
 }
 
-func (this *Board) isWallClear(wall Wall) bool {
-
-	for _, p := range wallShapes[wall.wType] {
-		wx := wall.position.x + p[0]
-		wy := wall.position.y + p[1]
-		w := BoardPos{wx, wy}
-		if this.get(w) != 0 {
-			return false
-		}
-	}
-	return true
-}
-
-func (this Wall) enumerateWallPositions() []BoardPos {
-
-	wallPoints := wallShapes[this.wType]
-	positions := make([]BoardPos, len(wallPoints))
-	for i, p := range wallPoints {
-		positions[i] = BoardPos{this.position.x + p[0], this.position.y + p[1]}
-	}
-
-	return positions
-}
-
-func (this *Board) dropWall(wall Wall) bool {
-
-	if this.isWallClear(wall) {
-		for _, p := range wall.enumerateWallPositions() {
-			this.set(p, WALL_MAX_HEALTH)
-		}
-		return true
-	}
-
-	return false
-}
-
 func (this *Board) nearestWallPos(enemyPos BoardPos) BoardPos {
 	lowestDist := 9999.0
 	closestWallPos := BoardPos{}
@@ -242,4 +95,17 @@ func (this *Board) nearestWallPos(enemyPos BoardPos) BoardPos {
 		}
 	}
 	return closestWallPos
+}
+
+func (this *Board) eventLoop() {
+	eventC := GetEventReceiver()
+	for {
+		select {
+		case event := <-eventC:
+			switch event.(type) {
+			case PeiceDroppedEvent:
+				NewPeice()
+			}
+		}
+	}
 }

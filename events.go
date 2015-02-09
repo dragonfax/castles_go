@@ -26,3 +26,24 @@ func GetEventReceiver() EventC {
 	eventReceivers = append(eventReceivers, eventReceiver)
 	return eventReceiver
 }
+
+func removeEventReceiver(ec EventC) {
+	var index int
+	for i := 0; i < len(eventReceivers); i++ {
+		if eventReceivers[i] == ec {
+			index = i
+		}
+	}
+	eventReceivers = append(eventReceivers[:index], eventReceivers[index+1:]...)
+}
+
+func CloseEventReceiver(ec EventC) {
+	close(ec)
+	removeEventReceiver(ec)
+
+	// incase MuxEvents is already writing to it
+	var ok = true
+	for ok {
+		_, ok = <-ec
+	}
+}
