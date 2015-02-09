@@ -1,8 +1,8 @@
 package main
 
-import "github.com/veandco/go-sdl2/sdl"
+type Event interface{}
 
-type EventC chan sdl.Event
+type EventC chan Event
 
 var eventSendC = make(EventC)
 
