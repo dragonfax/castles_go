@@ -21,9 +21,11 @@ func NewCastle() *Castle {
 }
 
 func (this *Castle) eat() {
-	this.health -= 1
+	if this.health > 0 {
+		this.health -= 1
+	}
 	if this.health == 0 {
-		panic("game over, castle dead")
+		eventSendC <- GameOverEvent{}
 	}
 }
 

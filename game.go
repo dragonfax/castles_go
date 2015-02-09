@@ -7,6 +7,8 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+type GameOverEvent struct{}
+
 type Game struct {
 	currentWall Wall
 	drawTicker  *time.Ticker

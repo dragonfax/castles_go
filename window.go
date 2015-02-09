@@ -47,7 +47,7 @@ func windowEventsLoop() {
 		select {
 		case event := <-eventReceiver:
 			switch event.(type) {
-			case *sdl.QuitEvent:
+			case *sdl.QuitEvent, GameOverEvent:
 				done = true
 				/*case *sdl.WindowEvent:
 				switch e.Event {
