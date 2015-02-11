@@ -4,7 +4,7 @@ type Event interface{}
 
 type EventC chan Event
 
-var eventSendC = make(EventC)
+var eventSendC = make(EventC, 100)
 
 var eventReceivers = make([]EventC, 0)
 
