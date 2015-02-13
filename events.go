@@ -8,13 +8,17 @@ var eventSendC = make(EventC, 100)
 
 var eventReceivers = make([]EventC, 0)
 
+var closedChannels = make(map[EventC]bool)
+
 // to run in a goroutine to make sure all event listeners get all events.
 func MuxEvents() {
 	for {
 		select {
 		case event := <-eventSendC:
 			for _, ec := range eventReceivers {
-				ec <- event
+				if !closedChannels[ec] {
+					ec <- event
+				}
 			}
 		}
 	}
@@ -38,8 +42,9 @@ func removeEventReceiver(ec EventC) {
 }
 
 func CloseEventReceiver(ec EventC) {
-	close(ec)
+	closedChannels[ec] = true
 	removeEventReceiver(ec)
+	close(ec)
 
 	// incase MuxEvents is already writing to it
 	var ok = true
