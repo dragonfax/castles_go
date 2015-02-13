@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"math/rand"
 
 	"github.com/veandco/go-sdl2/sdl"
@@ -110,9 +109,7 @@ func (this *Peice) drop() {
 		for _, p := range this.enumerateWallPositions() {
 			board.set(p, WALL_MAX_HEALTH)
 		}
-		fmt.Println("sending peice drop event")
 		eventSendC <- PeiceDroppedEvent{}
-		fmt.Println("sent peice drop event")
 		this.close()
 	}
 }
